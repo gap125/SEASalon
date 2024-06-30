@@ -1,0 +1,24 @@
+{
+    "development": {
+      "username": "root",
+      "password": "Popokbasi12",
+      "database": "SEASALON",
+      "host": "localhost",
+      "dialect": "mysql"
+    },
+    "test": {
+      "username": "root",
+      "password": "Popokbasi12",
+      "database": "SEASALON",
+      "host": "localhost",
+      "dialect": "mysql"
+    },
+    "production": {
+      "username": "root",
+      "password": "Popokbasi12",
+      "database": "SEASALON",
+      "host": "localhost",
+      "dialect": "mysql"
+    }
+  }
+  

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import ReviewsPage from './reviews';
 
 const Form = () => {
   const [reviews, setReviews] = useState([]);
@@ -7,24 +8,50 @@ const Form = () => {
   const [starRating, setStarRating] = useState(1);
   const [comment, setComment] = useState('');
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch('/api/reviews');
+        if (!res.ok) {
+          throw new Error('Failed to fetch reviews');
+        }
+        const data = await res.json();
+        setReviews(data);
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      }
+    }
+
+    fetchReviews();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate form data (optional)
+    const review = { customerName, starRating, comment };
 
-    // Create review object
-    const review = {
-      customerName,
-      starRating,
-      comment
-    };
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(review),
+      });
 
-    // Add review to state
-    setReviews([...reviews, review]);
+      if (!res.ok) {
+        throw new Error('Failed to submit review');
+      }
 
-    // Reset form fields
-    setCustomerName('');
-    setStarRating(1);
-    setComment('');
+      const newReview = await res.json();
+      setReviews([...reviews, newReview]);
+
+      // Reset form fields
+      setCustomerName('');
+      setStarRating(1);
+      setComment('');
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+    }
   };
 
   return (
@@ -36,10 +63,10 @@ const Form = () => {
       </Head>
 
       <main className="bg-[#6b4a1c] h-[600px] p-6">
-        <h1 className="text-4xl font-semibold text-center mb-4 text-white">Customer Review System</h1>
+        <h1 className="text-4xl font-bold text-center text-white">Customer Review System</h1>
 
         <div className="max-w-6xl mx-auto flex flex-row">
-          <form onSubmit={handleSubmit} className="w-[60%] mx-auto mt-8 p-4 bg-white shadow-md rounded-lg">
+          <form onSubmit={handleSubmit} className="w-[60%] h-auto mx-auto mt-8 p-4 bg-white shadow-md rounded-lg">
             <h2 className="text-xl font-bold mb-4">Leave a Review</h2>
 
             <div className="mb-4">
@@ -69,7 +96,9 @@ const Form = () => {
                 required
               >
                 {[1, 2, 3, 4, 5].map((rating) => (
-                  <option key={rating} value={rating}>{rating}</option>
+                  <option key={rating} value={rating}>
+                    {rating}
+                  </option>
                 ))}
               </select>
             </div>
@@ -89,22 +118,17 @@ const Form = () => {
             </div>
 
             <div className="text-right">
-              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
                 Submit Review
               </button>
             </div>
           </form>
 
           <div className="mt-8 w-[30%]">
-            <h2 className="text-xl font-bold mb-4 text-white">Reviews</h2>
-            {reviews.length === 0 && <p>No reviews yet.</p>}
-            {reviews.map((review, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-4 mb-4">
-                <p className="font-bold">{review.customerName}</p>
-                <p>Rating: {review.starRating}/5</p>
-                <p>{review.comment}</p>
-              </div>
-            ))}
+            <ReviewsPage></ReviewsPage>
           </div>
         </div>
       </main>
